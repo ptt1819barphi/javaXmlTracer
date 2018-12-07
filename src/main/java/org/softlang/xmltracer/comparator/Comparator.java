@@ -1,6 +1,9 @@
 package org.softlang.xmltracer.comparator;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiPredicate;
 import org.softlang.xmltracer.data.ArrayElement;
@@ -113,10 +116,14 @@ public class Comparator {
             return false;
         }
 
+        List<Element> tempList = new ArrayList<>(ele2.getCollection());
+
         NEXT:
         for (Element ele : ele1.getCollection()) {
-            for (Element otherEle : ele2.getCollection()) {
+            for (Iterator<Element> iterator = tempList.iterator(); iterator.hasNext();) {
+                Element otherEle = iterator.next();
                 if (compare(ele, otherEle)) {
+                    iterator.remove();
                     continue NEXT;
                 }
             }
