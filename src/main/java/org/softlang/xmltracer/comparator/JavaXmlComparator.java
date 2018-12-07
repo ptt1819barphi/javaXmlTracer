@@ -1,9 +1,8 @@
 package org.softlang.xmltracer.comparator;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import org.softlang.xmltracer.data.ArrayElement;
 import org.softlang.xmltracer.data.CollectionElement;
 import org.softlang.xmltracer.data.Element;
@@ -30,10 +29,10 @@ public class JavaXmlComparator extends Comparator {
                 (e1, e2) -> compareArray((ArrayElement) e1, new ArrayElement(new ArrayList<>(((CollectionElement) e2).getCollection()))));
 
         registerComparator((e1, e2) -> e1.getClass() == SetElement.class && (e2.getClass() == ObjectElement.class || e2.getClass() == PrimitiveElement.class),
-                (e1, e2) -> compareSet((SetElement) e1, new SetElement(Set.of(e2))));
+                (e1, e2) -> compareSet((SetElement) e1, new SetElement(Collections.singleton(e2))));
 
         registerComparator((e1, e2) -> e1.getClass() == ListElement.class && (e2.getClass() == ObjectElement.class || e2.getClass() == PrimitiveElement.class),
-                (e1, e2) -> compareList((ListElement) e1, new ListElement(List.of(e2))));
+                (e1, e2) -> compareList((ListElement) e1, new ListElement(Collections.singletonList(e2))));
 
         registerComparator((e1, e2) -> e1.getClass() == ArrayElement.class && (e2.getClass() == ObjectElement.class || e2.getClass() == PrimitiveElement.class),
                 (e1, e2) -> compareArray((ArrayElement) e1, new ArrayElement(new Element[]{e2})));
