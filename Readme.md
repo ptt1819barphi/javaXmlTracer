@@ -36,14 +36,14 @@ try {
 ```
 
 ## Compare both results:
-### Use the Comparator to compare trees resulting from same data structures:
+Use the Comparator to compare trees resulting from same data structures:
 
 ```java
 Comparator comparator = new Comparator();
 boolean result = comparator.compare(element1, element2);
 ```
 
-### Use the Comparator extension JavaXmlComparator to compare a tree resulting from a Java Object with a tree from Xml:
+Use the Comparator extension JavaXmlComparator to compare a tree resulting from a Java Object with a tree from Xml:
 
 ```java
 Comparator comparator = new JavaXmlComparator();
