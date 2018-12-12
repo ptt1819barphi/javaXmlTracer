@@ -1,10 +1,11 @@
 package org.softlang.xmltracer.comparator;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.BiPredicate;
 import org.softlang.xmltracer.data.ArrayElement;
 import org.softlang.xmltracer.data.CollectionElement;
@@ -16,37 +17,37 @@ import org.softlang.xmltracer.data.SetElement;
 
 public class Comparator {
 
-    private Map<BiPredicate<Element, Element>, BiPredicate<Element, Element>> map = new HashMap<>();
+    private final Set<ComparatorRule> rules = new HashSet<>();
 
     public Comparator() {
-        registerComparator((e1, e2) -> e1.getClass() == ObjectElement.class && e1.getClass() == e2.getClass(),
+        registerComparatorRule((e1, e2) -> e1.getClass() == ObjectElement.class && e1.getClass() == e2.getClass(),
                 (e1, e2) -> compareObject((ObjectElement) e1, (ObjectElement) e2));
 
-        registerComparator((e1, e2) -> e1.getClass() == PrimitiveElement.class && e1.getClass() == e2.getClass(),
+        registerComparatorRule((e1, e2) -> e1.getClass() == PrimitiveElement.class && e1.getClass() == e2.getClass(),
                 (e1, e2) -> comparePrimitive((PrimitiveElement) e1, (PrimitiveElement) e2));
 
-        registerComparator((e1, e2) -> e1.getClass() == CollectionElement.class && e1.getClass() == e2.getClass(),
+        registerComparatorRule((e1, e2) -> e1.getClass() == CollectionElement.class && e1.getClass() == e2.getClass(),
                 (e1, e2) -> compareCollection((CollectionElement) e1, (CollectionElement) e2));
 
-        registerComparator((e1, e2) -> e1.getClass() == SetElement.class && e1.getClass() == e2.getClass(),
+        registerComparatorRule((e1, e2) -> e1.getClass() == SetElement.class && e1.getClass() == e2.getClass(),
                 (e1, e2) -> compareSet((SetElement) e1, (SetElement) e2));
 
-        registerComparator((e1, e2) -> e1.getClass() == ListElement.class && e1.getClass() == e2.getClass(),
+        registerComparatorRule((e1, e2) -> e1.getClass() == ListElement.class && e1.getClass() == e2.getClass(),
                 (e1, e2) -> compareList((ListElement) e1, (ListElement) e2));
 
-        registerComparator((e1, e2) -> e1.getClass() == ArrayElement.class && e1.getClass() == e2.getClass(),
+        registerComparatorRule((e1, e2) -> e1.getClass() == ArrayElement.class && e1.getClass() == e2.getClass(),
                 (e1, e2) -> compareArray((ArrayElement) e1, (ArrayElement) e2));
 
     }
 
     /**
-     * Method for registering Comparator functions.
+     * Method for registering Comparator rules.
      *
-     * @param predicate1 Checks if predicate2 can compare the element pair.
-     * @param predicate2 Compares the element pair.
+     * @param check Checks if check can compare the element pair.
+     * @param rule Compares the element pair.
      */
-    public final void registerComparator(BiPredicate<Element, Element> predicate1, BiPredicate<Element, Element> predicate2) {
-        map.put(predicate1, predicate2);
+    public final void registerComparatorRule(BiPredicate<Element, Element> check, BiPredicate<Element, Element> rule) {
+        rules.add(new ComparatorRule(check, rule));
     }
 
     /**
@@ -57,9 +58,9 @@ public class Comparator {
      * @return True if the elements could be matched, else false.
      */
     public boolean compare(Element ele1, Element ele2) {
-        for (Map.Entry<BiPredicate<Element, Element>, BiPredicate<Element, Element>> entry : map.entrySet()) {
-            if (entry.getKey().test(ele1, ele2)) {
-                return entry.getValue().test(ele1, ele2);
+        for (ComparatorRule rule : rules) {
+            if (rule.getCheck().test(ele1, ele2)) {
+                return rule.getRule().test(ele1, ele2);
             }
         }
 
@@ -169,4 +170,25 @@ public class Comparator {
         return compareList(ele1, ele2);
     }
 
+    /**
+     * Intern helper class for defining a datatype for data comparisons.
+     */
+    private class ComparatorRule {
+
+        private final BiPredicate<Element, Element> check;
+        private final BiPredicate<Element, Element> rule;
+
+        public ComparatorRule(BiPredicate<Element, Element> check, BiPredicate<Element, Element> rule) {
+            this.check = check;
+            this.rule = rule;
+        }
+
+        public BiPredicate<Element, Element> getCheck() {
+            return check;
+        }
+
+        public BiPredicate<Element, Element> getRule() {
+            return rule;
+        }
+    }
 }

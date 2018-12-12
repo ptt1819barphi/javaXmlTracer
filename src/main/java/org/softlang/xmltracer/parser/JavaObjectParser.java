@@ -19,39 +19,39 @@ import org.softlang.xmltracer.data.SetElement;
 
 public class JavaObjectParser {
 
-    private final Map<Predicate<Class<? extends Object>>, Function<Object, Element>> map = new HashMap<>();
+    private final Set<JavaObjectParserRule> rules = new HashSet<>();
 
     /**
      * Default Constructor for the class JavaObjectParser.
      */
     public JavaObjectParser() {
-        registerParser(clazz -> clazz.isPrimitive()
+        registerParserRule(clazz -> clazz.isPrimitive()
                 || Number.class.isAssignableFrom(clazz)
                 || Character.class.isAssignableFrom(clazz)
                 || Boolean.class.isAssignableFrom(clazz)
                 || String.class.isAssignableFrom(clazz),
                 obj -> new PrimitiveElement(obj.toString()));
 
-        registerParser(clazz -> Set.class.isAssignableFrom(clazz),
+        registerParserRule(clazz -> Set.class.isAssignableFrom(clazz),
                 obj -> getSetElement((Set) obj));
 
-        registerParser(clazz -> List.class.isAssignableFrom(clazz),
+        registerParserRule(clazz -> List.class.isAssignableFrom(clazz),
                 obj -> getListElement((List) obj));
 
-        registerParser(clazz -> clazz.isArray(),
+        registerParserRule(clazz -> clazz.isArray(),
                 obj -> getArrayElement(obj));
     }
 
     /**
-     * Method for registering the mapping between predicates and functions.
+     * Method for registering additional parser rules.
      *
-     * @param predicate The predicate for the given function. Checks if the
+     * @param check The predicate for the given function. Checks if the
      * funtion can be used with the conditions specified in the predicate.
-     * @param function The function for creating an Element type from a
+     * @param rule The function for creating an Element type from a
      * specified Java Object.
      */
-    public final void registerParser(Predicate<Class<? extends Object>> predicate, Function<Object, Element> function) {
-        map.put(predicate, function);
+    public final void registerParserRule(Predicate<Class<? extends Object>> check, Function<Object, Element> rule) {
+        rules.add(new JavaObjectParserRule(check, rule));
     }
 
     /**
@@ -66,10 +66,10 @@ public class JavaObjectParser {
      */
     private Element getElement(Object obj) throws IllegalArgumentException, IllegalAccessException {
         Class<? extends Object> clazz = obj.getClass();
-
-        for (Map.Entry<Predicate<Class<? extends Object>>, Function<Object, Element>> entry : map.entrySet()) {
-            if (entry.getKey().test(clazz)) {
-                return entry.getValue().apply(obj);
+        
+        for (JavaObjectParserRule rule : rules) {
+            if (rule.getCheck().test(clazz)){
+                return rule.getRule().apply(obj);
             }
         }
 
@@ -171,10 +171,31 @@ public class JavaObjectParser {
         }
         return new SetElement(elements);
     }
-
+    
     @FunctionalInterface
     public static interface Function<T, R> {
-
         R apply(T t) throws IllegalArgumentException, IllegalAccessException;
+    }
+    
+    /**
+     * Intern helper class for defining a datatype for parsing Java Objects.
+     */
+    private class JavaObjectParserRule{
+        
+        private final Predicate<Class<? extends Object>> check;
+        private final Function<Object, Element> rule;
+
+        public JavaObjectParserRule(Predicate<Class<? extends Object>> check, Function<Object, Element> rule) {
+            this.check = check;
+            this.rule = rule;
+        }
+
+        public Predicate<Class<? extends Object>> getCheck() {
+            return check;
+        }
+
+        public Function<Object, Element> getRule() {
+            return rule;
+        }
     }
 }

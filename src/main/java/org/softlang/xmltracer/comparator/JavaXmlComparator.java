@@ -19,22 +19,22 @@ import org.softlang.xmltracer.data.SetElement;
 public class JavaXmlComparator extends Comparator {
 
     public JavaXmlComparator() {
-        registerComparator((e1, e2) -> e1.getClass() == SetElement.class && e2.getClass() == CollectionElement.class,
+        registerComparatorRule((e1, e2) -> e1.getClass() == SetElement.class && e2.getClass() == CollectionElement.class,
                 (e1, e2) -> compareSet((SetElement) e1, new SetElement(new HashSet<>(((CollectionElement) e2).getCollection()))));
 
-        registerComparator((e1, e2) -> e1.getClass() == ListElement.class && e2.getClass() == CollectionElement.class,
+        registerComparatorRule((e1, e2) -> e1.getClass() == ListElement.class && e2.getClass() == CollectionElement.class,
                 (e1, e2) -> compareList((ListElement) e1, new ListElement(new ArrayList<>(((CollectionElement) e2).getCollection()))));
 
-        registerComparator((e1, e2) -> e1.getClass() == ArrayElement.class && e2.getClass() == CollectionElement.class,
+        registerComparatorRule((e1, e2) -> e1.getClass() == ArrayElement.class && e2.getClass() == CollectionElement.class,
                 (e1, e2) -> compareArray((ArrayElement) e1, new ArrayElement(new ArrayList<>(((CollectionElement) e2).getCollection()))));
 
-        registerComparator((e1, e2) -> e1.getClass() == SetElement.class && (e2.getClass() == ObjectElement.class || e2.getClass() == PrimitiveElement.class),
+        registerComparatorRule((e1, e2) -> e1.getClass() == SetElement.class && (e2.getClass() == ObjectElement.class || e2.getClass() == PrimitiveElement.class),
                 (e1, e2) -> compareSet((SetElement) e1, new SetElement(Collections.singleton(e2))));
 
-        registerComparator((e1, e2) -> e1.getClass() == ListElement.class && (e2.getClass() == ObjectElement.class || e2.getClass() == PrimitiveElement.class),
+        registerComparatorRule((e1, e2) -> e1.getClass() == ListElement.class && (e2.getClass() == ObjectElement.class || e2.getClass() == PrimitiveElement.class),
                 (e1, e2) -> compareList((ListElement) e1, new ListElement(Collections.singletonList(e2))));
 
-        registerComparator((e1, e2) -> e1.getClass() == ArrayElement.class && (e2.getClass() == ObjectElement.class || e2.getClass() == PrimitiveElement.class),
+        registerComparatorRule((e1, e2) -> e1.getClass() == ArrayElement.class && (e2.getClass() == ObjectElement.class || e2.getClass() == PrimitiveElement.class),
                 (e1, e2) -> compareArray((ArrayElement) e1, new ArrayElement(new Element[]{e2})));
     }
 
